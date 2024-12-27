@@ -100,6 +100,36 @@ invalid:
 OtherToDecimal:
 ####
 # result in $t3
+
+       la $a0 , buffer
+       move $t4 , $t0 #number in t4
+       li $t3 , 0
+
+OtherConversionLoop:
+       lb $t5 , 0($a0)
+       beqz $t5 , DoneConversion
+       
+       ble $t5 , 57 , DigitConversion
+       ble $t5 , 70 , CharConversion
+
+       j invalidint
+
+DigitConversion:
+    subi $t5 , $t5 , 48      # Convert ASCII '0'-'9' to integer value
+    j ConvertToDecimal
+
+CharConversion:
+    subi $t5 , $t5 , 55      # Convert ASCII 'A'-'F' to integer value
+    j ConvertToDecimal
+    
+    
+ConvertToDecimal:
+      mul $t3 , $t3 , $t4
+      add $t3 , $t3 , $t5
+      addi $a0 , $a0 , 1
+      j OtherConversionLoop
+
+DoneConversion:
 	li $v0, 4
 	la $a0, output
 	syscall
@@ -109,8 +139,16 @@ OtherToDecimal:
     	
     	li $v0, 10
     	syscall
-    	
-    	
+
+
+invalidint:
+    # Print invalid input message
+    li $v0, 4
+    la $a0, error
+    syscall
+    
+    li $v0, 10
+    syscall
 
 	
 DecimalToOther:
@@ -186,4 +224,3 @@ StringToIntloop:
     
 DoneStringToInt:
   	jr $ra
-
