@@ -21,16 +21,10 @@ main:
 	li $v0, 4
 	la $a0, number
 	syscall
-	
 	li $v0, 8
 	la $a0, buffer  #number in buffer
 	li $a1, 150
 	syscall
-	
-	#check if valid if not exit
-	jal validate  #0 false or 1 true
-	move $t2, $v0
-	beqz $t2, invalid
 	
 	li $v0, 4
 	la $a0, base2
@@ -44,7 +38,7 @@ main:
 	move $t2, $v0
 	beqz $t2, invalid
 	
-  	jal OtherToDecimal  
+  	#jal OtherToDecimal  
 	jal DecimalToOther
 	
 	li $v0, 10
@@ -103,63 +97,9 @@ invalid:
 	
 	
 	
-OtherToDecimal:
-####
-# result in $t3
-
-       la $a0 , buffer
-       move $t4 , $t0 #number in t4
-       li $t3 , 0
-
-OtherConversionLoop:
-       lb $t5 , 0($a0)
-       beqz $t5 , DoneConversion
-       
-       ble $t5 , 57 , DigitConversion
-       ble $t5 , 70 , CharConversion
-
-       j invalidint
-
-DigitConversion:
-    subi $t5 , $t5 , 48      # Convert ASCII '0'-'9' to integer value
-    j ConvertToDecimal
-
-CharConversion:
-    subi $t5 , $t5 , 55      # Convert ASCII 'A'-'F' to integer value
-    j ConvertToDecimal
-    
-    
-ConvertToDecimal:
-      mul $t3 , $t3 , $t4
-      add $t3 , $t3 , $t5
-      addi $a0 , $a0 , 1
-      j OtherConversionLoop
-
-DoneConversion:
-	li $v0, 4
-	la $a0, output
-	syscall
-	li $v0, 1
-    	move $a0, $t3    
-    	syscall
-    	
-    	li $v0, 10
-    	syscall
-
-
-invalidint:
-    # Print invalid input message
-    li $v0, 4
-    la $a0, error
-    syscall
-    
-    li $v0, 10
-    syscall
-
-	
 DecimalToOther:
     # Convert decimal in $t3 to target base in $t1
-   # li $t3, 42
+        li $t3, 67
     	move $t0, $t3       
     	move $t4, $t1       
     	li $t2, 0           
@@ -230,3 +170,4 @@ StringToIntloop:
     
 DoneStringToInt:
   	jr $ra
+
