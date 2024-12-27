@@ -21,10 +21,16 @@ main:
 	li $v0, 4
 	la $a0, number
 	syscall
+	
 	li $v0, 8
 	la $a0, buffer  #number in buffer
 	li $a1, 150
 	syscall
+	
+	#check if valid if not exit
+	jal validate  #0 false or 1 true
+	move $t2, $v0
+	beqz $t2, invalid
 	
 	li $v0, 4
 	la $a0, base2
