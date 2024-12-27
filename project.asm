@@ -21,6 +21,8 @@ main:
 	li $v0, 4
 	la $a0, number
 	syscall
+	
+	
 	li $v0, 8
 	la $a0, buffer  #number in buffer
 	li $a1, 150
@@ -38,7 +40,7 @@ main:
 	move $t2, $v0
 	beqz $t2, invalid
 	
-  	#jal OtherToDecimal  
+  	jal OtherToDecimal  
 	jal DecimalToOther
 	
 	li $v0, 10
@@ -99,7 +101,7 @@ invalid:
 	
 DecimalToOther:
     # Convert decimal in $t3 to target base in $t1
-        li $t3, 67
+        #li $t3, 12
     	move $t0, $t3       
     	move $t4, $t1       
     	li $t2, 0           
@@ -170,4 +172,52 @@ StringToIntloop:
     
 DoneStringToInt:
   	jr $ra
+ 
+OtherToDecimal:
+    move $a0, $zero     
+    move $t3, $zero     
+    la $a1, buffer      
+    move $t4, $t0       
 
+OtherToDecimalLoop:
+    lb $t5, 0($a1)      # Load the next character of the number
+    beqz $t5, DoneOtherToDecimal # If the character is null terminator, exit loop
+
+    li $t6, 10          # Check if character is a newline
+    beq $t5, $t6, SkipOtherToDecimal
+
+    li $t6, 48          # Check if character is '0'-'9'
+    li $t7, 57
+    blt $t5, $t6, CheckCharOther
+    bgt $t5, $t7, CheckCharOther
+
+    subi $t5, $t5, 48   # Convert ASCII to numeric value
+    j ContinueOtherToDecimal
+
+CheckCharOther:
+    li $t6, 65          # Check if character is 'A'-'F'
+    li $t7, 70
+    blt $t5, $t6, InvalidOtherToDecimal
+    bgt $t5, $t7, InvalidOtherToDecimal
+
+    subi $t5, $t5, 55   # Convert ASCII to numeric value 
+
+ContinueOtherToDecimal:
+    mul $t3, $t3, $t4  
+    add $t3, $t3, $t5   
+    addi $a1, $a1, 1    
+    j OtherToDecimalLoop
+
+SkipOtherToDecimal:
+    addi $a1, $a1, 1    # Skip the newline and move to the next character
+    j OtherToDecimalLoop
+
+InvalidOtherToDecimal:
+    li $v0, 4
+    la $a0, error       
+    syscall
+    li $v0, 10          
+    syscall
+
+DoneOtherToDecimal:
+    jr $ra              
